@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "859122737109",
+    "project_id": "eb-workplace",
+    "storage_bucket": "eb-workplace.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859122737109:android:bbe8cd4d2c63921f00275c",
+        "android_client_info": {
+          "package_name": "com.EBworkplace.scannerapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfgvSV0HHTLha71c9Ag69Fe5RvuejhfnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
