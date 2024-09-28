@@ -200,9 +200,6 @@ public class loginActivity extends AppCompatActivity {
                             // Network error
                             Toast.makeText(getApplicationContext(), "Network error. Please check your internet connection.", Toast.LENGTH_SHORT).show();
                         }
-                        else if(e instanceof FirebaseAuthException){
-                            Toast.makeText(getApplicationContext(),  e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
                         else {
                             // Other errors
                             Toast.makeText(getApplicationContext(),   e.getMessage(), Toast.LENGTH_SHORT).show();
