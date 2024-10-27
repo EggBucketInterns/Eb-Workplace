@@ -49,7 +49,7 @@ public class morning_check_out extends AppCompatActivity {
         take_photo = findViewById(R.id.take_photo);
         submit = findViewById(R.id.submit);
         closing_stock = findViewById(R.id.closingStock);
-        money_collected = findViewById(R.id.money_collected);
+//        money_collected = findViewById(R.id.money_collected);
         progressBar = findViewById(R.id.progressbar);
         progressBar.setVisibility(View.INVISIBLE);
         mAuth = FirebaseAuth.getInstance();
@@ -93,7 +93,7 @@ public class morning_check_out extends AppCompatActivity {
     );
     private void handle_morning_check_out() {
         progressBar.setVisibility(View.VISIBLE);
-        String money = money_collected.getText().toString();
+//        String money = money_collected.getText().toString();
         String eggs = closing_stock.getText().toString();
 
         String date = LocalDate.now().toString();
@@ -112,7 +112,7 @@ public class morning_check_out extends AppCompatActivity {
                         } else {
                             Map<String, Object> map = new HashMap<>();
                             map.put("morning_check_out_time", LocalTime.now().toString());
-                            map.put("morning_money_collected", money);
+//                            map.put("morning_money_collected", money);
                             map.put("morning_closing_stock", eggs);
                             ref.update(map).addOnCompleteListener(task1 -> {
                                 progressBar.setVisibility(View.INVISIBLE);

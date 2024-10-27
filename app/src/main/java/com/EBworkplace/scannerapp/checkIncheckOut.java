@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class checkIncheckOut extends AppCompatActivity {
 
-    private Button morning_check_in, morning_check_out, evening_check_in, evening_check_out;
+    private Button morning_check_in, morning_check_out, evening_check_in, evening_check_out,purchaseBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +20,7 @@ public class checkIncheckOut extends AppCompatActivity {
         morning_check_out = findViewById(R.id.Morning_check_out);
         evening_check_in = findViewById(R.id.Evening_check_in);
         evening_check_out = findViewById(R.id.Evening_check_out);
+        purchaseBtn=findViewById(R.id.Purchase);
 
 
         morning_check_in.setOnClickListener(v -> {
@@ -42,5 +43,12 @@ public class checkIncheckOut extends AppCompatActivity {
             intent.setClass(checkIncheckOut.this, evening_check_out.class);
             startActivity(intent);
         });
+        purchaseBtn.setOnClickListener(v->{
+            Intent intent=new Intent();
+            intent.setClass(checkIncheckOut.this,purchase.class);
+            startActivity(intent);
+
+        });
+
     }
 }

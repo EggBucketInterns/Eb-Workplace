@@ -6,7 +6,6 @@
     android:background="#FFA500"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     tools:context=".checkIncheckOut">
 
     <androidx.cardview.widget.CardView
@@ -22,17 +21,13 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
-
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/imageView2"
                 android:layout_width="231dp"
                 android:layout_height="240dp"
                 android:layout_marginStart="248dp"
-
-
                 android:layout_marginTop="4dp"
                 android:src="@drawable/group_22"
                 app:layout_constraintStart_toStartOf="parent"
@@ -49,7 +44,7 @@
 
             <LinearLayout
                 android:layout_width="389dp"
-                android:layout_height="470dp"
+                android:layout_height="580dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/final_logo_7"
                 android:orientation="vertical"
@@ -58,7 +53,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView5"
                 app:layout_constraintVertical_bias="0.0">
-
 
                 <TextView
                     android:layout_width="match_parent"
@@ -71,42 +65,37 @@
                 <androidx.gridlayout.widget.GridLayout
                     android:id="@+id/gridLayout"
                     android:layout_width="350dp"
-                    android:layout_height="350dp"
-                    android:layout_margin="16dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
                     app:columnCount="2"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:orientation="horizontal"
-                    app:rowCount="2"
+                    app:rowCount="3"
                     tools:ignore="MissingClass">
 
                     <!-- Card 1 -->
                     <androidx.cardview.widget.CardView
                         android:layout_width="150dp"
-
                         android:layout_height="150dp"
                         android:layout_margin="8dp"
                         app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:layout_columnWeight="1"
-                        app:layout_rowWeight="1">
+                        app:cardElevation="4dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-
                             android:gravity="center"
                             android:orientation="vertical">
+
                             <Button
                                 android:id="@+id/Morning_check_in"
                                 android:layout_width="match_parent"
+                                android:layout_height="match_parent"
                                 android:background="#A1D6B2"
-                                android:text="Morning\nCheck in"
-                                android:layout_height="match_parent"/>
+                                android:text="Morning\nCheck in" />
                         </LinearLayout>
-
                     </androidx.cardview.widget.CardView>
 
                     <!-- Card 2 -->
@@ -114,11 +103,8 @@
                         android:layout_width="150dp"
                         android:layout_height="150dp"
                         android:layout_margin="8dp"
-                        android:background="@drawable/send_otp_back"
                         app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:layout_columnWeight="1"
-                        app:layout_rowWeight="1">
+                        app:cardElevation="4dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -130,11 +116,10 @@
                             <Button
                                 android:id="@+id/Morning_check_out"
                                 android:layout_width="match_parent"
+                                android:layout_height="match_parent"
                                 android:background="#A1D6B2"
-                                android:text="Morning\nCheck out"
-                                android:layout_height="match_parent"/>
+                                android:text="Morning\nCheck out" />
                         </LinearLayout>
-
                     </androidx.cardview.widget.CardView>
 
                     <!-- Card 3 -->
@@ -143,10 +128,7 @@
                         android:layout_height="150dp"
                         android:layout_margin="8dp"
                         app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-
-                        app:layout_columnWeight="1"
-                        app:layout_rowWeight="1">
+                        app:cardElevation="4dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -157,12 +139,10 @@
                             <Button
                                 android:id="@+id/Evening_check_in"
                                 android:layout_width="match_parent"
+                                android:layout_height="match_parent"
                                 android:background="#CEDF9F"
-                                android:text="Evening\nCheck in"
-                                android:layout_height="match_parent"/>
+                                android:text="Evening\nCheck in" />
                         </LinearLayout>
-
-
                     </androidx.cardview.widget.CardView>
 
                     <!-- Card 4 -->
@@ -171,9 +151,7 @@
                         android:layout_height="150dp"
                         android:layout_margin="8dp"
                         app:cardCornerRadius="8dp"
-                        app:cardElevation="4dp"
-                        app:layout_columnWeight="1"
-                        app:layout_rowWeight="1">
+                        app:cardElevation="4dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -185,24 +163,36 @@
                             <Button
                                 android:id="@+id/Evening_check_out"
                                 android:layout_width="match_parent"
+                                android:layout_height="match_parent"
                                 android:background="#CEDF9F"
-                                android:text="Evening\nCheck out"
-                                android:layout_height="match_parent"/>
+                                android:text="Evening\nCheck out" />
                         </LinearLayout>
-
                     </androidx.cardview.widget.CardView>
 
                 </androidx.gridlayout.widget.GridLayout>
+                <androidx.cardview.widget.CardView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_marginLeft="110dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#A1D6B2"
+                        android:gravity="center"
+                        android:orientation="vertical">
 
+                        <Button
+                            android:id="@+id/Purchase"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="#A1D6B2"
+                            android:text="Purchase" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
             </LinearLayout>
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </androidx.cardview.widget.CardView>
-
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
