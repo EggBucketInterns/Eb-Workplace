@@ -65,7 +65,7 @@ public class morning_check_out extends AppCompatActivity {
             takePhotoIntent(take_photo_intent);
         });
         submit.setOnClickListener(v -> {
-            if(closing_stock.getText().toString().isEmpty() || money_collected.getText().toString().isEmpty()){
+            if(closing_stock.getText().toString().isEmpty()){
                 Toast.makeText(getApplicationContext(), "Please enter closing stock and money collected", Toast.LENGTH_LONG).show();
                 return;
             }

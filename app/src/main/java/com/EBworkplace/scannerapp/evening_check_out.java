@@ -49,7 +49,7 @@ public class evening_check_out extends AppCompatActivity {
         take_photo = findViewById(R.id.take_photo);
         submit = findViewById(R.id.submit);
         closing_stock = findViewById(R.id.closingStock);
-        money_collected = findViewById(R.id.money_collected);
+//        money_collected = findViewById(R.id.money_collected);
         progressBar = findViewById(R.id.progressbar);
         progressBar.setVisibility(View.INVISIBLE);
         mAuth = FirebaseAuth.getInstance();
@@ -65,8 +65,8 @@ public class evening_check_out extends AppCompatActivity {
             takePhotoIntent(take_photo_intent);
         });
         submit.setOnClickListener(v -> {
-            if(closing_stock.getText().toString().isEmpty() || money_collected.getText().toString().isEmpty()){
-                Toast.makeText(getApplicationContext(), "Please enter closing stock and money collected", Toast.LENGTH_LONG).show();
+            if(closing_stock.getText().toString().isEmpty()){
+                Toast.makeText(getApplicationContext(), "Please enter closing stock", Toast.LENGTH_LONG).show();
                 return;
             }
             if(evening_check_out_image == null){
@@ -107,7 +107,7 @@ public class evening_check_out extends AppCompatActivity {
                         } else {
                             Map<String, Object> map = new HashMap<>();
                             map.put("evening_check_out_time", LocalTime.now().toString());
-                            map.put("evening_closing_stock", closing_stock.getText().toString());
+//                            map.put("evening_closing_stock", closing_stock.getText().toString());
                             map.put("evening_money_collected", money_collected.getText().toString());
                             ref.update(map).addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
