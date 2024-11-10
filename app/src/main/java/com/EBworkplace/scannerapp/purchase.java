@@ -74,7 +74,7 @@ public class purchase extends AppCompatActivity {
         // Prepare data to upload
         Map<String, Object> purchaseData = new HashMap<>();
         purchaseData.put("purchase_time", LocalTime.now().toString());
-        purchaseData.put("quantity", quantity);
+        purchaseData.put("purchased_stock", quantity);
 
         // Upload data to Firestore
         ref.set(purchaseData).addOnCompleteListener(new OnCompleteListener<Void>() {
