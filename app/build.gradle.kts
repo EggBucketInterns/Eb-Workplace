@@ -12,7 +12,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -51,5 +51,9 @@ dependencies {
     implementation(libs.play.services.base)
     implementation(libs.play.services.mlkit.document.scanner)
     implementation("com.google.android.gms:play-services-auth:20.3.0")
+    implementation ("com.google.android.gms:play-services-tasks:18.0.1")
+
     implementation("androidx.browser:browser:1.8.0")
+    implementation ("androidx.work:work-runtime:2.8.0")
+    implementation ("com.google.guava:guava:31.1-android")
 }

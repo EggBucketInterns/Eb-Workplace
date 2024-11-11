@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,7 +18,14 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
+import com.EBworkplace.scannerapp.UserModel.PhotoUploadWorker;
 import com.EBworkplace.scannerapp.UserModel.User_detail_model;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,6 +40,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -99,63 +110,158 @@ public class evening_check_in extends AppCompatActivity {
     private void handle_evening_check_in() {
         progressBar.setVisibility(View.VISIBLE);
         String date = LocalDate.now().toString();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference ref = db.collection(date).document(phone);
         String path = "Daily_Info/" + phone + "/" + date + "/" + "evening_check_in" + ".jpg";
-        uploadPhoto(path, evening_check_in_image, taskSnapshot -> {
-            ref.get().addOnCompleteListener(task -> {
-                progressBar.setVisibility(View.INVISIBLE);
-                if (task.isSuccessful()) {
-                    if (task.getResult() != null && task.getResult().exists()) {
-                        if (!Objects.equals(task.getResult().getString("evening_check_in_time"), " ")) {
-                            Toast.makeText(getApplicationContext(), "Already checked in", Toast.LENGTH_LONG).show();
+        String imagePath = saveBitmapToFile(evening_check_in_image);
+
+
+        checkLocalCacheForName();
+        saveCheckInData(date);
+        // Prepare data for the worker
+        Data workerData = new Data.Builder()
+                .putString("path", path)
+                .putString("imagePath", imagePath) // Pass file path instead of Bitmap
+                .putString("phone", phone)
+                .build();
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED) // Only run when network is connected
+                .build();
+        // Enqueue the worker
+        OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(PhotoUploadWorker.class)
+                .setInputData(workerData)
+                .setConstraints(constraints)
+                .build();
+
+        WorkManager.getInstance(getApplicationContext()).enqueue(uploadWorkRequest);
+
+        // Monitor the worker's state
+        WorkManager.getInstance(getApplicationContext()).getWorkInfoByIdLiveData(uploadWorkRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+//                            Toast.makeText(getApplicationContext(), "Photo uploaded ", Toast.LENGTH_LONG).show();
                         } else {
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("evening_check_in_time", LocalTime.now().toString());
-                            map.put("evening_opening_stock", opening_stock.getText().toString());
-                            ref.update(map).addOnCompleteListener(task1 -> {
-                                if (task1.isSuccessful()) {
-                                    Toast.makeText(getApplicationContext(), "Checked in", Toast.LENGTH_LONG).show();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), "Failed to check in", Toast.LENGTH_LONG).show();
-                                }
-                            });
+                            Toast.makeText(getApplicationContext(), "Photo upload failed", Toast.LENGTH_LONG).show();
                         }
-                    } else {
-                        //Create new only for evening check in
-                        check_local_cache_forName();
-                        SharedPreferences pref = getSharedPreferences("cache",MODE_PRIVATE);
-                        String outlet = pref.getString("name","null");
-                        if(outlet.equals("null")){
-                            outlet = " ";
-                        }
-                        User_detail_model user = new User_detail_model(
-                                " ", " ", LocalTime.now().toString(), " ", " ", opening_stock.getText().toString(), " ", " ", " ",
-                                " ",outlet
-                        );
-                        ref.set(user).addOnCompleteListener(task1 -> {
-                            if (task1.isSuccessful()) {
-                                Toast.makeText(getApplicationContext(), "Checked in", Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Failed to check in", Toast.LENGTH_LONG).show();
-                            }
-                        });
                     }
-                } else {
-                    Toast.makeText(getApplicationContext(), "Network error", Toast.LENGTH_LONG).show();
-                }
-                progressBar.setVisibility(View.INVISIBLE);
-            });
-        }, e -> {
-            Toast.makeText(getApplicationContext(), "Photo upload error", Toast.LENGTH_LONG).show();
-        });
+                });
+
+
+
     }
-    private void check_local_cache_forName(){
-        SharedPreferences pref = getSharedPreferences("cache",MODE_PRIVATE);
+//    private void handle_evening_check_in() {
+//        progressBar.setVisibility(View.VISIBLE);
+//        String date = LocalDate.now().toString();
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        DocumentReference ref = db.collection(date).document(phone);
+//        String path = "Daily_Info/" + phone + "/" + date + "/" + "evening_check_in" + ".jpg";
+//        uploadPhoto(path, evening_check_in_image, taskSnapshot -> {
+//            ref.get().addOnCompleteListener(task -> {
+//                progressBar.setVisibility(View.INVISIBLE);
+//                if (task.isSuccessful()) {
+//                    if (task.getResult() != null && task.getResult().exists()) {
+//                        if (!Objects.equals(task.getResult().getString("evening_check_in_time"), " ")) {
+//                            Toast.makeText(getApplicationContext(), "Already checked in", Toast.LENGTH_LONG).show();
+//                        } else {
+//                            Map<String, Object> map = new HashMap<>();
+//                            map.put("evening_check_in_time", LocalTime.now().toString());
+//                            map.put("evening_opening_stock", opening_stock.getText().toString());
+//                            ref.update(map).addOnCompleteListener(task1 -> {
+//                                if (task1.isSuccessful()) {
+//                                    Toast.makeText(getApplicationContext(), "Checked in", Toast.LENGTH_LONG).show();
+//                                } else {
+//                                    Toast.makeText(getApplicationContext(), "Failed to check in", Toast.LENGTH_LONG).show();
+//                                }
+//                            });
+//                        }
+//                    } else {
+//                        //Create new only for evening check in
+//                        check_local_cache_forName();
+//                        SharedPreferences pref = getSharedPreferences("cache",MODE_PRIVATE);
+//                        String outlet = pref.getString("name","null");
+//                        if(outlet.equals("null")){
+//                            outlet = " ";
+//                        }
+//                        User_detail_model user = new User_detail_model(
+//                                " ", " ", LocalTime.now().toString(), " ", " ", opening_stock.getText().toString(), " ", " ", " ",
+//                                " ",outlet
+//                        );
+//                        ref.set(user).addOnCompleteListener(task1 -> {
+//                            if (task1.isSuccessful()) {
+//                                Toast.makeText(getApplicationContext(), "Checked in", Toast.LENGTH_LONG).show();
+//                            } else {
+//                                Toast.makeText(getApplicationContext(), "Failed to check in", Toast.LENGTH_LONG).show();
+//                            }
+//                        });
+//                    }
+//                } else {
+//                    Toast.makeText(getApplicationContext(), "Network error", Toast.LENGTH_LONG).show();
+//                }
+//                progressBar.setVisibility(View.INVISIBLE);
+//            });
+//        }, e -> {
+//            Toast.makeText(getApplicationContext(), "Photo upload error", Toast.LENGTH_LONG).show();
+//        });
+//    }
+private void saveCheckInData(String date) {
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DocumentReference ref = db.collection(date).document(phone);
+
+    ref.get().addOnCompleteListener(task -> {
+
+        if (task.isSuccessful()) {
+            if (task.getResult() != null && task.getResult().exists()) {
+                if (!Objects.equals(task.getResult().getString("evening_check_in_time"), " ")) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getApplicationContext(), "Already checked in", Toast.LENGTH_LONG).show();
+                } else {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("evening_check_in_time", LocalTime.now().toString());
+                    map.put("evening_opening_stock", opening_stock.getText().toString());
+                    ref.update(map).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+
+                            Toast.makeText(getApplicationContext(), "Checked in", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Failed to check in", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+
+            } else {
+                //Create new only for evening check in
+                progressBar.setVisibility(View.INVISIBLE);
+                checkLocalCacheForName();
+                SharedPreferences pref = getSharedPreferences("cache",MODE_PRIVATE);
+                String outlet = pref.getString("name","null");
+                if(outlet.equals("null")){
+                    outlet = " ";
+                }
+                User_detail_model user = new User_detail_model(
+                        " ", " ", LocalTime.now().toString(), " ", " ", opening_stock.getText().toString(), " ", " ",
+                        outlet
+                );
+                ref.set(user).addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        Toast.makeText(getApplicationContext(), "Checked in", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Failed to check in", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Network error", Toast.LENGTH_LONG).show();
+        }
+
+    });
+}
+    private void checkLocalCacheForName() {
+        SharedPreferences pref = getSharedPreferences("cache", MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
-        String name = pref.getString("name","null");
-        if(name.equals("null")){
-            if(mAuth.getCurrentUser() == null){
+        String name = pref.getString("name", "null");
+        if (name.equals("null")) {
+            if (mAuth.getCurrentUser() == null) {
                 Intent intent = new Intent(evening_check_in.this, loginActivity.class);
                 Toast.makeText(getApplicationContext(), "Please login", Toast.LENGTH_SHORT).show();
                 startActivity(intent);
@@ -163,32 +269,78 @@ public class evening_check_in extends AppCompatActivity {
                 return;
             }
             String phone = mAuth.getCurrentUser().getPhoneNumber();
+            if (phone == null) {
+                Toast.makeText(getApplicationContext(), "Phone number is unavailable", Toast.LENGTH_SHORT).show();
+                return;
+            }
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             DocumentReference ref = db.collection("Employees").document(phone);
-            ref.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if(task.isSuccessful() && task.getResult() != null) {
-                        String name = task.getResult().getString("name");
-                        editor.putString("name",name);
-                        editor.apply();
+            ref.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        String fetchedName = document.getString("name");
+                        if (fetchedName != null && !fetchedName.isEmpty()) {
+                            editor.putString("name", fetchedName);
+                            editor.apply();
+                            Log.d("CacheUpdate", "Name successfully updated in cache: " + fetchedName);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Name field is empty", Toast.LENGTH_SHORT).show();
+                            Log.e("CacheUpdate", "Name field is empty in Firestore document.");
+                        }
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Document does not exist", Toast.LENGTH_SHORT).show();
+                        Log.e("CacheUpdate", "Document does not exist in Firestore.");
                     }
-                    else{
-                        Toast.makeText(getApplicationContext(), "Network error", Toast.LENGTH_SHORT).show();
-                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Network error", Toast.LENGTH_SHORT).show();
+                    Log.e("CacheUpdate", "Error getting document", task.getException());
                 }
+                // Invoke callback after completing cache update
+
             });
+        } else {
+            // Invoke callback if cache check is not needed
+
         }
     }
-    private void uploadPhoto(String path, Bitmap image, OnSuccessListener<UploadTask.TaskSnapshot> onSuccessListener, OnFailureListener onFailureListener) {
-        if (path.isEmpty() || image == null) {
-            Toast.makeText(getApplicationContext(), "Please take a photo", Toast.LENGTH_SHORT).show();
-            return;
+//    private void uploadPhoto(String path, Bitmap image, OnSuccessListener<UploadTask.TaskSnapshot> onSuccessListener, OnFailureListener onFailureListener) {
+//        if (path.isEmpty() || image == null) {
+//            Toast.makeText(getApplicationContext(), "Please take a photo", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//        StorageReference ref = storage.getReference().child(path);
+//        ByteArrayOutputStream arr = new ByteArrayOutputStream();
+//        image.compress(Bitmap.CompressFormat.JPEG, 50, arr);
+//        UploadTask task = ref.putBytes(arr.toByteArray());
+//        task.addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
+//    }
+    private String saveBitmapToFile(Bitmap bitmap) {
+        File file = new File(getCacheDir(), "evening_check_in.jpg");
+
+        try {
+            // Check if the file already exists
+            if (file.exists()) {
+                boolean isDeleted = file.delete();
+                if (isDeleted) {
+                    Log.i("FileDeletion", "Existing file deleted successfully: " + file.getAbsolutePath());
+                } else {
+                    Log.e("FileDeletion", "Failed to delete existing file: " + file.getAbsolutePath());
+                }
+            }
+
+            // Save the new bitmap to file
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            Log.i("FileSave", "Bitmap saved successfully at: " + file.getAbsolutePath());
+            return file.getAbsolutePath();
+
+        } catch (IOException e) {
+            Log.e("FileSaveError", "Error saving bitmap to file", e);
+            return null;
         }
-        StorageReference ref = storage.getReference().child(path);
-        ByteArrayOutputStream arr = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 50, arr);
-        UploadTask task = ref.putBytes(arr.toByteArray());
-        task.addOnSuccessListener(onSuccessListener).addOnFailureListener(onFailureListener);
     }
 }
