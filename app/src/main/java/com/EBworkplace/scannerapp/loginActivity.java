@@ -239,6 +239,7 @@ public class loginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Intent intent = new Intent(loginActivity.this, checkIncheckOut.class);
                     startActivity(intent);
+                    finish();
                 } else {
                     Toast.makeText(getApplicationContext(), "OTP verification failed", Toast.LENGTH_SHORT).show();
                 }
